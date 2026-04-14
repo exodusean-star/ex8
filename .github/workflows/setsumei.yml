@@ -1,6 +1,6 @@
 name: Auto-Scailing-Instance-Deployment
 
-'on':
+on:
   push:
     branches:
       - main
@@ -22,3 +22,20 @@ jobs:
         run: |
           aws s3 cp ./default.conf s3://${{ secrets.S3_BUCKET_NAME }}/conf.d/default.conf
           aws s3 sync ./html/ s3://${{ secrets.S3_BUCKET_NAME }}/html/ --delete
+#ecr에 docker 이미지 빌드 후 푸시
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v4
+
+      - name: build and push docker image to ECR
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
