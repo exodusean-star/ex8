@@ -25,7 +25,7 @@ jobs:
 #ecr에 docker 이미지 빌드 후 푸시
       - name: Log in to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v4
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: build and push docker image to ECR
         env:
